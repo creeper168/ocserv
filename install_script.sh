@@ -44,22 +44,14 @@ function sys_clean(){
 	sed -i '/service httpd start/d' /etc/rc.d/rc.local
 	sed -i '/echo 1 > \/proc\/sys\/net\/ipv4\/ip_forward/d' /etc/rc.d/rc.local
 	sed -i '/iptables -F/d' /etc/rc.d/rc.local
-	sed -i '/iptables -A INPUT -i lo -j ACCEPT/d' /etc/rc.d/rc.local
-	sed -i '/iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT/d' /etc/rc.d/rc.local
-	sed -i '/iptables -A INPUT -p icmp -j ACCEPT/d' /etc/rc.d/rc.local
-	sed -i '/iptables -A INPUT -p tcp --dport 22 -j ACCEPT/d' /etc/rc.d/rc.local
-	sed -i '/iptables -I INPUT -p tcp --dport 80 -j ACCEPT/d' /etc/rc.d/rc.local
-	sed -i '/iptables -A INPUT -p tcp --dport 4433 -j ACCEPT/d' /etc/rc.d/rc.local
-	sed -i '/iptables -A INPUT -p udp --dport 4433 -j ACCEPT/d' /etc/rc.d/rc.local
-	sed -i '/iptables -A INPUT -j DROP/d' /etc/rc.d/rc.local
 	sed -i '/iptables -t nat -F/d' /etc/rc.d/rc.local
-	sed -i '/iptables -t nat -A POSTROUTING -s 10.12.0.0\/24 -o eth0 -j MASQUERADE/d' /etc/rc.d/rc.local
+	sed -i '/iptables -t nat -A POSTROUTING -s 10.12.0.0\/24 -j MASQUERADE/d' /etc/rc.d/rc.local
+	sed -i '/iptables -t nat -A POSTROUTING -s 10.12.0.0\/24 -j MASQUERADE/d' /etc/rc.d/rc.local
+	sed -i '/iptables -t mangle -A PREROUTING -s 10.12.0.0\/24 -j MARK --set-mark 0x10/d' /etc/rc.d/rc.local
 	sed -i '/#自动调整mtu，ocserv服务器使用/d' /etc/rc.d/rc.local
 	sed -i '/iptables -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu/d' /etc/rc.d/rc.local
 	sed -i '/systemctl start mariadb/d' /etc/rc.d/rc.local
 	sed -i '/systemctl start httpd/d' /etc/rc.d/rc.local
-	sed -i '/systemctl start radiusd/d' /etc/rc.d/rc.local
-	sed -i '/iptables -I INPUT -p tcp --dport 9090 -j ACCEPT/d' /etc/rc.d/rc.local
 }
 function centos1_ntp(){
 	setenforce 0
@@ -147,16 +139,9 @@ service ocserv start
 service httpd start
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -F
-iptables -A INPUT -i lo -j ACCEPT
-iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A INPUT -p icmp -j ACCEPT
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-iptables -A INPUT -p tcp --dport 4433 -j ACCEPT
-iptables -A INPUT -p udp --dport 4433 -j ACCEPT
-iptables -A INPUT -j DROP
 iptables -t nat -F
-iptables -t nat -A POSTROUTING -s 10.12.0.0/24 -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 10.12.0.0/24 -j MASQUERADE
+iptables -t mangle -A PREROUTING -s 10.12.0.0/24 -j MARK --set-mark 0x10
 #自动调整mtu，ocserv服务器使用
 iptables -I FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 EOF
